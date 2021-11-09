@@ -1,0 +1,49 @@
+/* CSS Document */
+body {
+	background-color: gray;
+	width: 100%;
+	padding: 2%;
+}
+#pageContent {
+	background-color: aliceblue;
+}
+header {
+	outline-style: solid;
+	outline-width: 2px;
+	outline-color: blue;
+}
+
+#jumbo {
+  background-image: url('code.png');
+  background-size: cover;
+  color: #ffffff;
+  height: 450px;
+  font-weight: 900;
+
+}
+footer {
+	outline-style: solid;
+	outline-width: 2px;
+	outline-color: blue;
+}
+
+.contentCenter {
+	text-align: center;
+}
+
+#blueBorder {
+	outline-style: solid;
+	outline-width: 2px;
+	outline-color: blue;
+}
+#redBorder {
+	outline-style:solid;
+	outline-width: 1px;
+	outline-color: black;
+}
+
+.footer1 {
+	bottom: 0px;
+	width: 100%;
+	background-color: black;
+}

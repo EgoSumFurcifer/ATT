@@ -1,0 +1,117 @@
+<html> 
+ <head>
+    <title>Conway's Game of Life</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="style.css" />
+</head>
+ <body>
+<div>
+	<nav class="navbar navbar-expand-md navbar-dark bg-dark">
+		<a class="navbar-brand" href="#">Alex, Terran, and Toby</a>
+		<button type="button" class="navbar-toggler" data-togle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		  <div class="collapse navbar-collapse" id="navbarNav">
+			<ul class="navbar-nav">
+			  <li><a class="nav-link" href="index.html">Home</a>
+			  <li class="active"><a class="nav-link" href="#">Conway's Game of Life</a>
+			  <li><a class="nav-link" href="#">Contact</a>
+			  <li><a class="nav-link" href="#">About</a>
+			 </ul>
+		  </div>
+	</nav>
+      <h1>Game of Life</h1>
+  </div>
+  <p align="center"> 
+	<!--This draws the Canvas on the webpage -->
+      <canvas id="mycanvas"></canvas>
+ </body>
+  <script src="https://cdn.jsdelivr.net/processing.js/1.4.8/processing.min.js"></script> 
+  <script>
+  var programCode = function(processingInstance) {
+    with (processingInstance) {
+      size(600, 600); 
+      frameRate(30);
+        
+      // Paste code from Khan Academy here:
+textAlign(CENTER,CENTER);
+background(255,255,255);
+var turn = "X";
+var state = "         ";
+var won = false;
+var drawState = function(){
+    strokeWeight(20);
+    line(200,0,200,600);
+    line(400,0,400,600);
+    line(0,200,600,200);
+    line(0,400,600,400);
+    fill(255, 0, 0);
+    textSize(64);
+    for(var i = 0;i<state.length;i++){
+        text(state.charAt(i),200*floor(i%(width/200))+100,100+floor(i/3)*200);
+    }
+};
+
+var pInput = function(num,turn){
+    var fstate = state.slice(0,num) + turn + state.slice(num+1,state.length);
+    state = fstate;
+};
+
+var nextTurn = function(){
+    if(turn === "X"){
+        turn = "O";
+    } else {
+        turn = "X";
+    }
+    drawState();
+};
+
+var win = function(){
+    background(255, 255, 255);
+    textSize(125);
+    text(turn + " Wins!",300,271);
+    won = true;
+    textSize(25);
+    text("Click anywhere to play again",291,374);
+};
+
+var whatBox = function(){
+    this.x = floor(mouseX/200);
+    this.y = floor(mouseY/200);
+    return (this.x+this.y*3);
+};
+
+var checkWin = function(){
+    var checks = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    for(var i = 0;i<checks.length;i++){
+        if(state.charAt(checks[i][0]) === state.charAt(checks[i][1]) && state.charAt(checks[i][0]) !== " " && state.charAt(checks[i][1]) === state.charAt(checks[i][2])){
+            nextTurn();
+            win();
+        }
+        
+    }
+};
+
+mouseClicked = function(){
+    var pos = whatBox();
+    if(state.charAt(pos) === " " && won === false){
+        pInput(pos,turn);
+        nextTurn();
+        checkWin();
+    } else if(won === true){
+        won = false;
+        turn = "X";
+        state = "         ";
+        background(255, 255, 255);
+        drawState();
+    }
+};
+
+drawState();
+
+    }};
+	var canvas = document.getElementById("mycanvas"); 
+    // Pass the function sketchProc (defined in myCode.js) to Processing's constructor.
+    var processingInstance = new Processing(canvas, sketchProc); 
+  </script>
+  </html>

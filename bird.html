@@ -1,0 +1,267 @@
+<html> 
+ <head>
+    <title>Flappy Bird</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="style.css" />
+</head>
+ <body>
+<div>
+	<nav class="navbar navbar-expand-md navbar-dark bg-dark">
+		<a class="navbar-brand" href="#">Alex, Terran, and Toby</a>
+		<button type="button" class="navbar-toggler" data-togle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		  <div class="collapse navbar-collapse" id="navbarNav">
+			<ul class="navbar-nav">
+			  <li><a class="nav-link" href="index.html">Home</a>
+			  <li><a class="nav-link" href="#">Conway's Game of Life</a>
+			  <li class="active"><a class="nav-link" href="bird.html">Flappy Bird</a>
+			  <li><a class="nav-link" href="pong.html">Pong</a>
+			 </ul>
+		  </div>
+	</nav>
+      <h1>Flappy Bird</h1>
+  </div>
+  <p align="center"> 
+	<!--This draws the Canvas on the webpage -->
+      <canvas id="mycanvas"></canvas>
+ </body>
+  <script src="https://cdn.jsdelivr.net/processing.js/1.4.8/processing.min.js"></script> 
+  <script>
+	var sketchProc = function(processingInstance) {
+     with (processingInstance) {
+        size(600, 400); 
+        frameRate(60);
+        
+        // ProgramCodeGoesHere
+        var speed = -5;
+var alive = true;
+var jumpHeight = 6.25;
+var score = 0;
+textAlign(CENTER,CENTER);
+var Thing = function(position,size,mass,elasticity){
+    this.position = position;
+    this.velocity = new PVector(0,0);
+    this.size = size;
+    this.mass = mass;
+    this.acceleration = new PVector(0,0);
+    this.friction = new PVector(0,0);
+    this.elasticity = elasticity || 0;
+    this.color = color || [255,255,0];
+};
+
+Thing.prototype.display = function(){
+    var r = this.position.y;
+    var e = map(this.velocity.y,-jumpHeight,10,-50,50);
+    pushMatrix();
+    translate(200,r);
+    
+    rotate(radians(e));
+    strokeWeight(1);
+    stroke(0, 0, 0);
+    //body
+    fill(255, 221, 0);
+    ellipse(0,0,23,20);
+    //beak
+    fill(255, 0, 0);
+    ellipse(8,4,15,5);
+    //eye
+    fill(209, 184, 209);
+    ellipse(6,-2,7,5);
+    //wing
+    fill(219, 240, 127);
+    ellipse(-9,1,10,8);
+    //eyeball
+    fill(0, 0, 0);
+    ellipse(7,-2,2,2);
+    popMatrix();
+};
+
+Thing.prototype.move = function(){
+    this.velocity.add(this.acceleration);
+    this.velocity.sub(this.friction);
+    this.position.add(this.velocity);
+    this.display();
+    this.acceleration.mult(0);
+};
+
+Thing.prototype.applyDownwardGravity = function(){
+    this.acceleration.add(0,0.4);
+};
+
+Thing.prototype.bounce = function(){
+    if (this.position.x > (width - (this.size/2))) {
+            this.velocity.x *= -this.elasticity;
+            this.position.x = width-this.size/2;
+    }
+    if(this.position.x < this.size/2){
+            this.velocity.x *= -this.elasticity;
+            this.position.x = 0+this.size/2;
+    }
+    if ((this.position.y > height - (this.size/2))) {
+            this.velocity.y *= -this.elasticity;
+            this.position.y = height-this.size/2;
+    }
+    if(this.position.y < this.size/2){
+            this.velocity.y *= -this.elasticity;
+            this.position.y = 0+this.size/2;
+    }
+};
+
+var Piller = function(gapWidth, gapPos, positionX) {
+    this.pos = positionX;
+    this.gap = gapWidth;
+    this.gPos = gapPos;
+    this.stroke = 2;
+};
+
+Piller.prototype.draw = function() {
+    //x position is handled by a translate because i am lazy
+    pushMatrix();
+    translate(this.pos, 0);
+    this.preDraw(this.gap, this.gPos);
+    popMatrix();
+};
+
+Piller.prototype.preDraw = function(tall, position) {
+    tall = this.gap;
+    position = this.gPos;
+    //upper
+    this.shadedRect(0, -this.stroke, 40, position+this.stroke);
+    this.shadedRect(0-5, position-20, 50, 20);
+    
+    //lower
+    this.shadedRect(0, tall+position+20, 40, height-position+tall);
+    this.shadedRect(0-5, tall+position, 50, 20);
+};
+
+Piller.prototype.shadedRect = function(x, y, wide, tall) {
+    //creates the parts that the pillers are made of
+    
+    this.rad = 2;
+    
+    //main body
+    strokeWeight(this.stroke);
+    stroke(70);
+    fill(0, 189, 66);
+    rect(x, y, wide, tall, this.rad);
+    
+    //under lighting
+    fill(114, 199, 66);
+    noStroke();
+    rect(x+this.stroke/2+wide/15, y+this.stroke/2, wide/10, tall-this.stroke, this.rad);
+    
+    //lighting
+    fill(197, 255, 130);
+    rect(x+this.stroke/2, y+this.stroke/2, wide/15, tall-this.stroke, this.rad);
+    rect(x+this.stroke/2+wide/7, y+this.stroke/2, wide/30, tall-this.stroke, this.rad);
+    
+    //shading
+    fill(0, 122, 35);
+    rect(x+wide-wide/10 - this.stroke/2, y+this.stroke/2, wide/10, tall-this.stroke, this.rad);
+    rect(x+wide-wide/5, y+this.stroke/2, wide/30, tall-this.stroke, this.rad);
+};
+
+Piller.prototype.move = function() {
+    this.pos = this.pos += speed;
+    this.draw();
+    
+};
+
+Piller.prototype.reset = function(gapWidth, gapPos) {
+    this.gap = gapWidth;
+    this.gPos = gapPos;
+    this.pos = width+100;
+};
+
+Piller.prototype.score = function(){
+    if(this.pos === 150){
+        score++;
+    }
+};
+
+var bird = new Thing(new PVector(200,height/2),20);
+
+Piller.prototype.isInside = function(){
+    if(this.pos < 205+bird.size/2 && this.pos > 150 && (bird.position.y > this.gPos+this.gap-15 || bird.position.y < this.gPos+15)){
+
+        alive = false;
+        speed = 0;
+    }
+};
+
+var pillar = new Piller(100, 200, 600);
+var pillar2 = new Piller(100,200,1000);
+
+var newGame = function(){
+score = 0;
+bird.position.y = 200;
+pillar.pos = 500;
+pillar2.pos = 100;
+alive = true;
+speed = -5;
+};
+
+var dead = function(){
+    background(255, 46, 126);
+    pillar.move();
+    pillar2.move();
+    textSize(60);
+    fill(0, 0, 0);
+    textAlign(CENTER,CENTER);
+    text("You Died!",300,200);
+    fill(0, 21, 255);
+    textSize(20);
+    text("Your final score was " + score,300,300);
+    bird.move();
+    text("Click anywhere to play again!",300,350);
+    if(mousePressed) {
+        newGame();
+    }
+};
+
+draw = function() {
+    background(99, 255, 203);
+    pillar.move();
+    pillar2.move();
+    pillar.score();
+    pillar2.score();
+    pillar.isInside();
+    pillar2.isInside();
+    bird.applyDownwardGravity();
+    bird.bounce();
+    bird.move();
+    fill(247, 255, 0);
+    textSize(30);
+    textAlign(BASELINE,BASELINE);
+    text(score,10,30);
+    textAlign(CENTER,CENTER);
+    if (pillar.pos < -100){
+        pillar.reset(random(65, 120), random(0, 350));
+    }
+    if (pillar2.pos < -100){
+        pillar2.reset(random(65, 120), random(0, 350));
+    }
+    if(alive === false){
+        dead();
+    }
+};
+//jumping
+mousePressed = function() {
+    if(alive){
+        bird.velocity.set(0,-jumpHeight);
+        bird.move();
+    }
+    };
+keyPressed = function() {
+    if(alive){
+        bird.velocity.set(0,-jumpHeight);
+        bird.move();
+    }
+    };
+    }};
+var canvas = document.getElementById("mycanvas"); 
+    // Pass the function sketchProc (defined in myCode.js) to Processing's constructor.
+    var processingInstance = new Processing(canvas, sketchProc); 
+  </script>
+  </html>

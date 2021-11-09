@@ -1,0 +1,148 @@
+<html> 
+ <head>
+    <title>Conway's Game of Life</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="style.css" />
+</head>
+ <body>
+<div>
+	<nav class="navbar navbar-expand-md navbar-dark bg-dark">
+		<a class="navbar-brand" href="#">Alex, Terran, and Toby</a>
+		<button type="button" class="navbar-toggler" data-togle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		  <div class="collapse navbar-collapse" id="navbarNav">
+			<ul class="navbar-nav">
+			  <li><a class="nav-link" href="index.html">Home</a>
+			  <li class="active"><a class="nav-link" href="life.html">Conway's Game of Life</a>
+			  <li><a class="nav-link" href="bird.html">Flappy Bird</a>
+			  <li><a class="nav-link" href="pong.html">Pong</a>
+			 </ul>
+		  </div>
+	</nav>
+      <h1>Game of Life</h1>
+  </div>
+  <p align="center"> 
+	<!--This draws the Canvas on the webpage -->
+      <canvas id="mycanvas"></canvas>
+ </body>
+ <script src="https://cdn.jsdelivr.net/processing.js/1.4.8/processing.min.js"></script> 
+ 
+ <script>
+    var sketchProc = function(processingInstance) {
+     with (processingInstance) {
+        size(400, 400); 
+        frameRate(30);
+        
+                // ProgramCodeGoesHere
+        /**
+Any live cell with two or three live neighbours survives.
+Any dead cell with three live neighbours becomes a live cell.
+All other live cells die in the next generation.
+Made by Alex Lettuce and TheHappy
+Press any key to stop/start
+*/
+var framerate = 144; // max 144
+var grid = [];
+var fgrid = [];
+var nums = [-(width/10)-1,-(width/10),-(width/10)+1,-1,1,(width/10)-1,(width/10),(width/10)+1];
+var generations = 0;
+for(var i = 0;i<(width/10)*(height/10);i++){
+        grid[i] = false;
+        fgrid[i] = false;
+}
+
+fgrid = grid;
+fgrid = [];
+// grid[820] = true;
+// grid[821] = true;
+// grid[822] = true;
+// grid[782] = true;
+// grid[741] = true;
+var displayGrid = function(gridInput){
+    for(var i = 0;i<gridInput.length*1;i+=1){
+        if(grid[i]){fill(10, 1, 10);}else{fill(252, 252, 252);}
+            rect(10*floor(i%(width/10)),floor(i/(width/10))*10,10,10);
+    }
+};
+
+var calcNON = function(id){
+    var j = 0;
+    for(var i = 0;i<nums.length;i++){
+        if(grid[id+nums[i]]){
+            j++;
+        }
+        if(grid[id+nums[i]] === undefined){
+            if(nums[i]>0 && grid[id+nums[i]-(width/10)*(height/10)]){
+                j++;
+            } else if(grid[id+nums[i]+(width/10)*(height/10)]){
+                j++;
+              }
+            }
+        }
+    
+    return j;
+};
+
+var nextGen = function(){
+    for(var i = 0;i<grid.length;i++){
+        var y = calcNON(i);
+        
+        if(y === 3){
+            fgrid[i] = true;
+        } else if(grid[i] && y === 2){
+            fgrid[i] = true;
+        } else{
+            fgrid[i] = false;
+        }
+
+    }
+    grid = fgrid;
+    fgrid = [];
+    displayGrid(grid);
+    generations++;
+};
+textSize(20);
+displayGrid(grid);
+frameRate(framerate);
+
+var whatSquare = function(x, y) {
+    this.size = 10;
+    this.gridSize = width/size;
+    this.name = floor(x/this.size) + (floor(y/10))*(width/10);
+    return(this.name);
+};
+
+var running = false;
+var clickState = false;
+
+draw = function(){
+    mousePressed = function(){
+        this.clicked = whatSquare(mouseX, mouseY);
+        clickState = !grid[this.clicked];
+        grid[this.clicked] = clickState;
+    };
+    mouseDragged = function() {
+        this.clicked = whatSquare(mouseX, mouseY);
+        grid[this.clicked] = clickState;
+        
+    };
+    keyPressed = function (){
+            running = !running;
+    };
+    
+    if (running){
+        nextGen();
+    }
+    displayGrid(grid);
+    fill(0, 0, 255);
+    text(generations,5,20);
+};
+    }};
+var canvas = document.getElementById("mycanvas"); 
+    // Pass the function sketchProc (defined in myCode.js) to Processing's constructor.
+    var processingInstance = new Processing(canvas, sketchProc); 
+ </script>
+ </html>
+ 
+ 
